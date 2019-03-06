@@ -1,0 +1,85 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper{
+    margin: 60px auto;
+    width: 800px;
+    height: 600px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.info{
+    margin-top:100px;
+    width: 200px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+.score{
+    
+}
+
+button{
+    width: 100px;
+    margin-top:5px; 
+    height: 20px;
+    text-align: center;
+}
+
+.ground{
+    position: relative;
+    background: url('../img/floor.png') repeat;
+    width: 600px;
+    height: 600px;
+}
+
+.square{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+}
+
+.food{
+    border-radius: 50%;
+    background-image: url('../img/food.png');
+    background-size: cover;
+    background-position: 40% 50%;
+}
+
+.stone{
+    background-image: url('../img/stone.jpg');
+    background-size: cover;
+    background-position: 40% 50%;
+}
+
+.snakeHead{
+    background-image: url('../img/snakeHead.png');
+    background-size: cover;
+    border-radius: 50%;
+}
+
+.snakeBody{
+    background-image: url('../img/snakeBody.png');
+    background-size: cover;
+    border-radius: 50%
+    
+}
+
+.snakeHead-down{
+    transform: rotate(90deg);
+}
+
+.snakeHead-up{
+    transform: rotate(-90deg);
+}
+
+.snakeHead-left{
+    transform: rotate(180deg)
+}
+
+

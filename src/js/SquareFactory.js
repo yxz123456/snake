@@ -1,61 +1,56 @@
-
 function SquareFactory() {
 
 }
 
-SquareFactory.create = function(type,x,y,color){
-    //如果该类型不存在，弹出一个错误
-    if(SquareFactory.prototype[type] == undefined){
-        throw 'this type is undefined';
+SquareFactory.create = function (type, x, y) {
+    if (!SquareFactory.prototype[type]) {
+        throw 'no is type'
     }
-
-    //如果工厂的该类型没有继承自工厂，则继承
-    //下面要用到工厂的方法
-    if(SquareFactory.prototype[type].prototype.__proto__ != SquareFactory.prototype){
-        SquareFactory.prototype[type].prototype = new SquareFactory();
-    }
-    let newSquare = new SquareFactory.prototype[type](x,y,color);
-
-    return newSquare;
-}
-SquareFactory.prototype.init = function(Square,color,strategyMessage){
-    Square.viewContent.style.position = "absolute";
-    Square.viewContent.style.width = Square.width + "px";
-    Square.viewContent.style.height = Square.height + "px";
-    Square.viewContent.style.top = Square.y*SQUAREWIDTH + "px";
-    Square.viewContent.style.left = Square.x*SQUAREWIDTH + "px";
-    Square.viewContent.style.backgroundColor = color;
-    Square.touch = function () {
-        return strategyMessage;
-    }
-}
-SquareFactory.prototype.Floor = function(x,y,color){
-    let obj = new Floor(x,y,SQUAREWIDTH,SQUAREWIDTH);
-    // console.log(this);
-    this.init(obj,color,TOUCHENUM.MOVE);
-    return obj;
+    //创建这个type的实例
+    let newSquare = SquareFactory.prototype[type](type, x, y)
+    return newSquare
 }
 
-SquareFactory.prototype.Stone = function(x,y,color){
-    let obj = new Stone(x,y,SQUAREWIDTH,SQUAREWIDTH);
-    this.init(obj,color,TOUCHENUM.DIE);
-    return obj;
+SquareFactory.prototype.init = function (square, type, x, y, strategyMessage) {
+    let squareDom = square.viewContent
+    squareDom.className = 'square ' + type
+    squareDom.style.left = x * SQUAREWIDTH + 'px'
+    squareDom.style.top = y * SQUAREWIDTH + 'px'
+    //每个方块都有一个touch方法，被触碰会怎么样(蛇头没有)
+    square.touch = function () {
+        return strategyMessage
+    }
 }
-SquareFactory.prototype.Food = function(x,y,color){
-    let obj = new Food(x,y,SQUAREWIDTH,SQUAREWIDTH);
-    this.init(obj, color, TOUCHENUM.EAT);
-    obj.update(x,y);
-    return obj;
+
+
+SquareFactory.prototype.food = function (type, x, y) {
+    let obj = new Food(x, y, SQUAREWIDTH, SQUAREWIDTH)
+    this.init(obj, type, x, y, ACTIONENUM.eat)
+    obj.upDate(x,y)
+    return obj
 }
-SquareFactory.prototype.SnakeHead = function(x,y,color){
-    let obj = new SnakeHead(x,y,SQUAREWIDTH,SQUAREWIDTH);
-    this.init(obj, color, TOUCHENUM.DIE);
-    obj.update(x,y);
-    return obj;
+
+SquareFactory.prototype.floor = function (type, x, y) {
+    let obj = new Floor(x, y, SQUAREWIDTH, SQUAREWIDTH)
+    this.init(obj, type, x, y, ACTIONENUM.move)
+    return obj
 }
-SquareFactory.prototype.SnakeBody = function(x,y,color){
-    let obj = new SnakeBody(x,y,SQUAREWIDTH,SQUAREWIDTH);
-    this.init(obj, color, TOUCHENUM.DIE);
-    obj.update(x,y);
-    return obj;
+
+SquareFactory.prototype.stone = function (type, x, y) {
+    let obj = new Stone(x, y, SQUAREWIDTH, SQUAREWIDTH)
+    this.init(obj, type, x, y, ACTIONENUM.die)
+    return obj
+}
+
+SquareFactory.prototype.snakeHead = function (type, x, y) {
+    let obj = new SnakeHead(x, y, SQUAREWIDTH, SQUAREWIDTH)
+    this.init(obj, type, x, y)
+    obj.upDate(x,y)
+    return obj
+}
+
+SquareFactory.prototype.snakeBody = function (type, x, y) {
+    let obj = new SnakeBody(x, y, SQUAREWIDTH, SQUAREWIDTH)
+    this.init(obj, type, x, y, ACTIONENUM.die)
+    return obj
 }

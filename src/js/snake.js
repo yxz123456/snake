@@ -1,118 +1,125 @@
-let snake = new Snake();
-//头
-snake.head = null;
-//尾
-snake.tail = null;
+let snake = new Snake()
+snake.head = null
+snake.tail = null
 
-//方向枚举
 let DIRECTIONENUM = {
-    Right:{
-        x:1,
-        y:0
+    right: {
+        x: 1,
+        y: 0,
+        name:'right'
     },
-    Left:{
-        x:-1,
-        y:0
+    left: {
+        x: -1,
+        y: 0,
+        name:'left'
     },
-    Up:{
-        x:0,
-        y:-1
+    up: {
+        x: 0,
+        y: -1,
+        name:'up'
     },
-    Down:{
-        x:0,
-        y:1
+    down: {
+        x: 0,
+        y: 1,
+        name:'down'
     }
 }
 
-//蛇初始化
 snake.init = function () {
-    let snakeHead = SquareFactory.create('SnakeHead',3,1,'red');
-    let snakeBody1 = SquareFactory.create('SnakeBody',2,1,"blue");
-    let snakeBody2 = SquareFactory.create('SnakeBody',1,1,"blue");
+    //初始化
+    let snakeHead = SquareFactory.create('snakeHead', 3, 1)
+    let snakeBody1 = SquareFactory.create('snakeBody', 2, 1)
+    let snakeBody2 = SquareFactory.create('snakeBody', 1, 1)
 
-    console.log(this == snake);//true
+    //双向链表连接
+    snakeHead.next = snakeBody1
+    snakeHead.prev = null
 
+    snakeBody1.next = snakeBody2
+    snakeBody1.prev = snakeHead
 
-    snake.head = snakeHead;
-    snake.tail = snakeBody2;
+    snakeBody2.next = null
+    snakeBody2.prev = snakeBody1
 
-    //链表连接
-    snakeHead.next = snakeBody1;
-    snakeHead.prev = null;
-    snakeBody1.next = snakeBody2;
-    snakeBody1.prev = snakeHead;
-    snakeBody2.next = null;
-    snakeBody2.prev = snakeBody1;
+    this.head = snakeHead
+    this.tail = snakeBody2
 
-    //显示
-    ground.remove(snakeHead.x,snakeHead.y);
-    ground.remove(snakeBody1.x,snakeBody1.y);
-    ground.remove(snakeBody2.x,snakeBody2.y);
-    ground.append(snakeHead);
-    ground.append(snakeBody1);
-    ground.append(snakeBody2);
+    //放入ground
+    ground.append(snakeHead)
+    ground.append(snakeBody1)
+    ground.append(snakeBody2)
 
     //初始移动方向
-    this.direction = DIRECTIONENUM.Right;
+    this.direction = DIRECTIONENUM.right
 }
 
 snake.strategies = {
-    //flag move为true eat为false
-    move(snake,ground,nextSquare,flag=true) {
+    //flag判断是移动还是吃
+    move(snake,nextSquare,flag=false) {
+        //创建一个新的body
+        let newBody = SquareFactory.create('snakeBody', snake.head.x, snake.head.y)
+        
+        //新body融入
+        newBody.prev = snake.head
+        newBody.next = snake.head.next
+        newBody.next.prev = newBody
+        snake.head.next = newBody
+        //删除原来的头，插入身体
+        ground.remove(snake.head.x, snake.head.y)
+        ground.append(newBody)
+        // 创建新头
+        let newHead = SquareFactory.create('snakeHead', nextSquare.x, nextSquare.y)
+        
+        // 连接
+        newHead.next = newBody
+        newHead.prev = null
+        newBody.prev = newHead
 
-        //新建身
-        let newBody = SquareFactory.create('SnakeBody',snake.head.x,snake.head.y,'blue');
+        snake.head = newHead
+        snake.headTurn(snake.direction.name)
+        // 删除下一个方块,放入新头
+        ground.remove(nextSquare.x, nextSquare.y)
+        ground.append(newHead)
 
-        //融入
-        newBody.next = snake.head.next;
-        newBody.prev = null;
-        newBody.next.prev = newBody;
-        ground.remove(snake.head.x,snake.head.y);
-        ground.append(newBody);
+        //如果不是吃
+        if (!flag) {
+            let newFloor = SquareFactory.create('floor', snake.tail.x, snake.tail.y)
+            //删除原来的尾巴，放入地板
+            ground.remove(snake.tail.x, snake.tail.y)
+            ground.append(newFloor,true)
 
-        //新建头
-        let newHead = SquareFactory.create('SnakeHead',nextSquare.x,nextSquare.y,'red');
-
-        //连接
-        newHead.next = newBody;
-        newHead.prev = null;
-        newBody.prev = newHead;
-        ground.remove(nextSquare.x,nextSquare.y);
-        ground.append(newHead);
-
-        //去掉尾巴并安上地板
-        if(flag){
-            ground.remove(snake.tail.x,snake.tail.y);
-
-            let newFloor = SquareFactory.create('Floor',snake.tail.x,snake.tail.y,'orange');
-
-            ground.append(newFloor);
-            snake.tail = snake.tail.prev;
-            snake.tail.next = null;
-        }
-
-        snake.head = newHead;
+            //新尾巴
+            snake.tail = snake.tail.prev
+            snake.tail.next = null
+        }      
     },
-    eat(snake,ground,nextSquare) {
-        game.score++;
-        snake.strategies.move(snake,ground,nextSquare,false);
-        createFood(ground);
+    eat (snake,nextSquare) {
+        game.score++
+        game.upDateScore()
+        snake.strategies.move(snake,nextSquare,true)
+        game.createFood()
     },
-    die(){
-        game.over();
+    die () {
+        game.over()
     }
 }
 
-//移动
-snake.move = function(ground){
-    //找到当前移动方向的下一格
-    let nextSquare = ground.squareList[this.head.y + this.direction.y][this.head.x + this.direction.x];
-    //console.log(nextSquare);
+snake.move = function () {
+    //找到下一个方块
+    let nextSquare = ground.squareTable[this.head.x + this.direction.x][this.head.y + this.direction.y]
+    
     if(typeof nextSquare.touch == 'function'){
-        //console.log(nextSquare.touch());
-        snake.strategies[nextSquare.touch()](this,ground,nextSquare);
+        this.strategies[nextSquare.touch()](this,nextSquare)
     }
 }
 
-
+snake.headTurn = function (direction){
+    if(direction !== 'right'){
+        snake.head.viewContent.className = 'square snakeHead ' + 'snakeHead-' + direction
+    }
+    else{
+        snake.head.viewContent.className = 'square snakeHead'
+    }
+    
+}
 

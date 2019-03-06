@@ -1,53 +1,52 @@
-let ground = new Ground(BASE_X_POINT,BASE_Y_POINT,XLEN*SQUAREWIDTH,YLEN*SQUAREWIDTH);
+let ground = new Ground(BASE_GROUND_X,BASE_GROUND_Y)
 
 ground.init = function () {
-    this.viewContent.style.position = "absolute";
-    this.viewContent.style.top = this.x + "px";
-    this.viewContent.style.left = this.y + "px";
-    this.viewContent.style.width = this.width + "px";
-    this.viewContent.style.height = this.height + "px";
-    this.viewContent.style.backgroundColor = "#007165";
-    document.body.appendChild(this.viewContent);
+    this.viewContent.className = 'ground'
+    this.squareTable = []
+    this.putSquare()
+    document.getElementsByClassName('wrapper')[0].appendChild(this.viewContent)
 
-    this.squareList = [];
+}
 
-    for(let i = 0; i < YLEN; i++){
-        //每一行的方块
-        let squareX = new Array(XLEN);
-        for(let j = 0; j < XLEN; j++){
-            let newSquare = null;
-            //墙
-            if(j == 0 || j == XLEN - 1 || i == 0 || i == YLEN - 1){
-                newSquare = SquareFactory.create("Stone",j,i,"#000");
+ground.putSquare = function () {
+    let squareList
+    for(let i = 0; i < LENX; i++){
+        squareList = []
+        for(let j = 0; j < LENY; j++){
+            let square = null
+            //根据情况建造方块
+            if(i == 0 || i == LENX - 1 || j == 0 || j == LENY - 1){
+                //放墙
+                square = SquareFactory.create('stone', i, j)
+                //放入广场
+                this.viewContent.appendChild(square.viewContent)
             }
-            //地板
             else{
-                newSquare = SquareFactory.create("Floor",j,i,"orange");
+                //放地板
+                square = SquareFactory.create('floor', i, j)
             }
-            this.viewContent.appendChild(newSquare.viewContent);
-            squareX[j] = newSquare;
+            squareList.push(square)
         }
-        this.squareList.push(squareX);
+        this.squareTable.push(squareList)
     }
-    console.log(this.squareList);
 }
 
-ground.init();
 
-//拆方块
 ground.remove = function (x,y) {
-    //视觉上拆
-    this.viewContent.removeChild(this.squareList[y][x].viewContent);
-    //数据层面上拆
-    this.squareList[y][x] = null;
+    //视觉上拆 
+    if(this.squareTable[x][y].viewContent.parentNode === this.viewContent){
+        this.viewContent.removeChild(this.squareTable[x][y].viewContent)
+    }
+    //数据上拆
+    this.squareTable[x][y] = null
 }
 
-//按方块
-ground.append = function (square) {
+ground.append = function (square,flag=false) {
     //视觉上安
-    this.viewContent.appendChild(square.viewContent);
+    if(!flag){
+        this.viewContent.appendChild(square.viewContent)
+    }
+    
     //数据上安
-    this.squareList[square.y][square.x] = square;
+    this.squareTable[square.x][square.y] = square
 }
-
-
